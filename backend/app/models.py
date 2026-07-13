@@ -16,7 +16,7 @@ class MedicalInstitution(Base):
     department = Column(String, nullable=False, index=True)  # 診療科
     established_date = Column(Date, nullable=True)
     source = Column(String, nullable=False)  # データ出典（都道府県名等）
-    geom = Column(Geometry(geometry_type="POINT", srid=4326), nullable=False)
+    geom = Column(Geometry(geometry_type="POINT", srid=4326, spatial_index=False), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -26,7 +26,7 @@ class PopulationMesh(Base):
 
     mesh_code = Column(String, primary_key=True)  # 3次メッシュコード（約1km四方）
     prefecture = Column(String, nullable=False, index=True)
-    geom = Column(Geometry(geometry_type="POLYGON", srid=4326), nullable=False)
+    geom = Column(Geometry(geometry_type="POLYGON", srid=4326, spatial_index=False), nullable=False)
     total_population = Column(Integer, nullable=True)
     household_count = Column(Integer, nullable=True)
     source_year = Column(Integer, nullable=False)  # 国勢調査の調査年
@@ -50,7 +50,7 @@ class DiagnosisLog(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     department = Column(String, nullable=False)
     address_input = Column(String, nullable=False)
-    geom = Column(Geometry(geometry_type="POINT", srid=4326), nullable=True)
+    geom = Column(Geometry(geometry_type="POINT", srid=4326, spatial_index=False), nullable=True)
     conditions = Column(JSON, nullable=True)  # 駅徒歩・駐車場・テナント形態等
     result_summary = Column(JSON, nullable=True)  # 需要推定・BEP診断結果
     email = Column(String, nullable=True, index=True)
