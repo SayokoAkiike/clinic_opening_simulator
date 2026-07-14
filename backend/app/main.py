@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.database import SessionLocal
 from app.demand import analyze_catchment_area, AgeBracketPopulation
+from app.bep import calculate_bep, StaffPlan, DEPARTMENT_BENCHMARKS
 
 app = FastAPI(title="Clinic Opening Simulator API")
 
@@ -43,4 +44,54 @@ def catchment_analysis(
         ],
         "competitor_count": result.competitor_count,
         "competitor_department": result.competitor_department,
+    }
+
+
+@app.get("/api/bep-diagnosis")
+def bep_diagnosis(
+    latitude: float,
+    longitude: float,
+    walk_minutes: float = 10.0,
+    department: str = "内科",
+    monthly_rent: int = 300_000,
+    doctor_count: int = 1,
+    nurse_count: int = 1,
+    clerk_count: int = 1,
+    db: Session = Depends(get_db),
+):
+    if department not in DEPARTMENT_BENCHMARKS:
+        return {"error": f"未対応の診療科です: {department}"}
+
+    catchment = analyze_catchment_area(db, latitude, longitude, walk_minutes, department)
+
+    staff_plan = StaffPlan(
+        doctor_count=doctor_count,
+        nurse_count=nurse_count,
+        clerk_count=clerk_count,
+    )
+
+    bep_result = calculate_bep(
+        department=department,
+        monthly_rent=monthly_rent,
+        staff_plan=staff_plan,
+    )
+
+    return {
+        "department": department,
+        # 商圏の実データ(人口・競合数)。需要規模の推定値ではなく、判断材料として
+        # そのまま提示する(受療率データが揃うまで需要vs損益分岐点の自動判定は行わない)
+        "catchment": {
+            "radius_m": round(catchment.radius_m, 1),
+            "total_population": catchment.total_population,
+            "competitor_count": catchment.competitor_count,
+        },
+        "bep": {
+            "monthly_rent": bep_result.monthly_rent,
+            "monthly_staff_cost": bep_result.monthly_staff_cost,
+            "monthly_fixed_cost": bep_result.monthly_fixed_cost,
+            "revenue_per_patient": bep_result.revenue_per_patient,
+            "breakeven_patients_per_day": bep_result.breakeven_patients_per_day,
+            "typical_patients_per_day": bep_result.typical_patients_per_day,
+            "is_department_estimated": bep_result.is_department_estimated,
+        },
     }
