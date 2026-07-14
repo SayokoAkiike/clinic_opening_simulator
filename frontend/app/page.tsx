@@ -39,6 +39,11 @@ type DiagnosisResult = {
     is_patient_count_estimated: boolean;
     is_revenue_estimated: boolean;
   };
+  theoretical_demand: {
+    has_rate_data: boolean;
+    daily_patients_area_total: number;
+    annual_patients_area_total: number;
+  };
 };
 
 export default function Home() {
@@ -335,6 +340,31 @@ export default function Home() {
                 </p>
               )}
             </div>
+
+            <div className="border-t border-dashed border-[var(--color-border)] my-6" />
+
+            <h3 className="font-semibold mb-3">商圏全体の理論需要</h3>
+            {result.theoretical_demand.has_rate_data ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                  <StatCard
+                    label="商圏内の理論患者数(1日あたり)"
+                    value={`${result.theoretical_demand.daily_patients_area_total}人`}
+                  />
+                  <StatCard
+                    label="商圏内の理論患者数(年間)"
+                    value={`${result.theoretical_demand.annual_patients_area_total.toLocaleString()}人`}
+                  />
+                </div>
+                <p className="text-xs text-[var(--color-ink-soft)] mb-4">
+                  厚生労働省「患者調査」の外来受療率と商圏内の年齢構成から算出した、この立地・診療科全体の理論的な需要規模です。同科競合{result.catchment.competitor_count}件と分け合うことになる点に留意してください。
+                </p>
+              </>
+            ) : (
+              <p className="text-xs text-[var(--color-ink-soft)] mb-4">
+                {department}は公的統計(患者調査)の対象外のため、理論需要は算出していません。商圏人口・競合数を参考に判断してください。
+              </p>
+            )}
 
             <div className="border-t border-dashed border-[var(--color-border)] my-6" />
 

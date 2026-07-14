@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app.demand import analyze_catchment_area, AgeBracketPopulation
 from app.bep import calculate_bep, StaffPlan, DEPARTMENT_BENCHMARKS
+from app.demand_rate import estimate_theoretical_demand, ANNUAL_WORKING_DAYS
 
 app = FastAPI(title="Clinic Opening Simulator API")
 
@@ -76,10 +77,12 @@ def bep_diagnosis(
         staff_plan=staff_plan,
     )
 
+    demand_result = estimate_theoretical_demand(db, latitude, longitude, walk_minutes, department)
+
     return {
         "department": department,
         # 商圏の実データ(人口・競合数)。需要規模の推定値ではなく、判断材料として
-        # そのまま提示する(受療率データが揃うまで需要vs損益分岐点の自動判定は行わない)
+        # そのまま提示する
         "catchment": {
             "radius_m": round(catchment.radius_m, 1),
             "total_population": catchment.total_population,
@@ -94,5 +97,12 @@ def bep_diagnosis(
             "typical_patients_per_day": bep_result.typical_patients_per_day,
             "is_patient_count_estimated": bep_result.is_patient_count_estimated,
             "is_revenue_estimated": bep_result.is_revenue_estimated,
+        },
+        # 受療率(患者調査)に基づく商圏全体の理論外来患者数。歯科・美容系は
+        # 受療率データが存在しないためhas_rate_data=Falseとなり値は参考にならない
+        "theoretical_demand": {
+            "has_rate_data": demand_result.has_rate_data,
+            "daily_patients_area_total": round(demand_result.daily_patients, 1),
+            "annual_patients_area_total": round(demand_result.daily_patients * ANNUAL_WORKING_DAYS),
         },
     }
