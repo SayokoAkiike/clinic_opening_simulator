@@ -6,3 +6,6 @@ geoalchemy2
 pydantic-settings
 anthropic
 alembic
+requests
+pyshp
+shapely
