@@ -92,6 +92,7 @@ def bep_diagnosis(
             "revenue_per_patient": bep_result.revenue_per_patient,
             "breakeven_patients_per_day": bep_result.breakeven_patients_per_day,
             "typical_patients_per_day": bep_result.typical_patients_per_day,
-            "is_department_estimated": bep_result.is_department_estimated,
+            "is_patient_count_estimated": bep_result.is_patient_count_estimated,
+            "is_revenue_estimated": bep_result.is_revenue_estimated,
         },
     }

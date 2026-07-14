@@ -28,19 +28,20 @@ ANNUAL_SALARY = {
 # ============================================================
 @dataclass
 class DepartmentBenchmark:
-    daily_patients_typical: int  # 平均的な診療所の1日患者数(需要が十分にある場合の目安)
-    revenue_per_patient: int     # 1人あたり診療単価(円、院外処方想定)
-    is_estimated: bool           # True: 内科/整形外科以外の推定値
+    daily_patients_typical: int   # 平均的な診療所の1日患者数(需要が十分にある場合の目安)
+    revenue_per_patient: int      # 1人あたり診療単価(円、院外処方想定)
+    is_patient_count_estimated: bool  # True: 出典に実データが無く推測した値
+    is_revenue_estimated: bool        # True: 出典に実データが無く推測した値
 
 
 DEPARTMENT_BENCHMARKS = {
-    "内科": DepartmentBenchmark(daily_patients_typical=31, revenue_per_patient=5200, is_estimated=False),
-    "整形外科": DepartmentBenchmark(daily_patients_typical=92, revenue_per_patient=4500, is_estimated=True),
-    "小児科": DepartmentBenchmark(daily_patients_typical=31, revenue_per_patient=5000, is_estimated=True),
-    "皮膚科": DepartmentBenchmark(daily_patients_typical=40, revenue_per_patient=4800, is_estimated=True),
-    "耳鼻科": DepartmentBenchmark(daily_patients_typical=45, revenue_per_patient=4500, is_estimated=True),
-    "歯科": DepartmentBenchmark(daily_patients_typical=20, revenue_per_patient=6500, is_estimated=True),
-    "美容系": DepartmentBenchmark(daily_patients_typical=15, revenue_per_patient=15000, is_estimated=True),
+    "内科":   DepartmentBenchmark(daily_patients_typical=31, revenue_per_patient=5200, is_patient_count_estimated=False, is_revenue_estimated=True),
+    "小児科": DepartmentBenchmark(daily_patients_typical=31, revenue_per_patient=5000, is_patient_count_estimated=False, is_revenue_estimated=True),
+    "整形外科": DepartmentBenchmark(daily_patients_typical=92, revenue_per_patient=4500, is_patient_count_estimated=False, is_revenue_estimated=True),
+    "皮膚科": DepartmentBenchmark(daily_patients_typical=40, revenue_per_patient=4800, is_patient_count_estimated=True, is_revenue_estimated=True),
+    "耳鼻科": DepartmentBenchmark(daily_patients_typical=45, revenue_per_patient=4500, is_patient_count_estimated=True, is_revenue_estimated=True),
+    "歯科":   DepartmentBenchmark(daily_patients_typical=20, revenue_per_patient=6500, is_patient_count_estimated=True, is_revenue_estimated=True),
+    "美容系": DepartmentBenchmark(daily_patients_typical=15, revenue_per_patient=15000, is_patient_count_estimated=True, is_revenue_estimated=True),
 }
 
 MONTHLY_WORKING_DAYS = 24  # 月の診療日数の想定(週6日診療相当)
@@ -65,7 +66,8 @@ class BEPResult:
     revenue_per_patient: int
     breakeven_patients_per_day: float
     typical_patients_per_day: int
-    is_department_estimated: bool
+    is_patient_count_estimated: bool
+    is_revenue_estimated: bool
 
 
 def calculate_monthly_staff_cost(staff_plan: StaffPlan) -> int:
@@ -112,5 +114,6 @@ def calculate_bep(
         revenue_per_patient=benchmark.revenue_per_patient,
         breakeven_patients_per_day=round(breakeven_patients_per_day, 1),
         typical_patients_per_day=benchmark.daily_patients_typical,
-        is_department_estimated=benchmark.is_estimated,
+        is_patient_count_estimated=benchmark.is_patient_count_estimated,
+        is_revenue_estimated=benchmark.is_revenue_estimated,
     )

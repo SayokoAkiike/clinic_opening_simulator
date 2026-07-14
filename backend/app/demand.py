@@ -102,7 +102,13 @@ def get_catchment_population(
         elif gender == "female":
             entry.female = population
 
-    age_breakdown = sorted(age_map.values(), key=lambda a: a.age_bracket)
+    # age_bracketは"0-4"〜"70-74","75+"の文字列。文字列ソートだと"5-9"が
+    # "45-49"の後に来るなど実年齢順にならないため、開始年齢を数値として抽出してソートする
+    def _age_sort_key(bracket: AgeBracketPopulation) -> int:
+        start = bracket.age_bracket.split("-")[0].replace("+", "")
+        return int(start)
+
+    age_breakdown = sorted(age_map.values(), key=_age_sort_key)
 
     return (
         summary_row.mesh_count,
